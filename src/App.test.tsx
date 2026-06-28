@@ -1,7 +1,27 @@
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
 
-test('renderiza o título', () => {
-  render(<App />);
-  expect(screen.getByText('bg-remover')).toBeInTheDocument();
+vi.mock('./lib/removeBackground', () => ({
+  removeBackground: vi.fn(async () => new Blob(['cut'], { type: 'image/png' })),
+}));
+
+beforeEach(() => {
+  globalThis.URL.createObjectURL = vi.fn(() => 'blob:fake');
+  globalThis.URL.revokeObjectURL = vi.fn();
+});
+
+describe('App', () => {
+  it('processa a imagem e mostra o botão de baixar', async () => {
+    render(<App />);
+    const input = screen.getByTestId('file-input');
+    const file = new File(['x'], 'logo.png', { type: 'image/png' });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /baixar/i }),
+      ).toBeInTheDocument();
+    });
+  });
 });
