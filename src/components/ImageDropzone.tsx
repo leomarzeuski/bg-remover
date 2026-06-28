@@ -24,7 +24,16 @@ export function ImageDropzone({ onImage }: Props) {
   return (
     <div>
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Enviar imagem"
         onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === ' ') e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);

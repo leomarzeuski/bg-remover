@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
+import { removeBackground } from './lib/removeBackground';
 
 vi.mock('./lib/removeBackground', () => ({
   removeBackground: vi.fn(async () => new Blob(['cut'], { type: 'image/png' })),
@@ -21,6 +22,20 @@ describe('App', () => {
     await waitFor(() => {
       expect(
         screen.getByRole('button', { name: /baixar/i }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('mostra o botão "Tentar de novo" quando removeBackground rejeita', async () => {
+    vi.mocked(removeBackground).mockRejectedValueOnce(new Error('falhou'));
+    render(<App />);
+    const input = screen.getByTestId('file-input');
+    const file = new File(['x'], 'logo.png', { type: 'image/png' });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /tentar de novo/i }),
       ).toBeInTheDocument();
     });
   });

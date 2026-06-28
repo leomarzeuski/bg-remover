@@ -19,6 +19,7 @@ export async function composeBackground(
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {

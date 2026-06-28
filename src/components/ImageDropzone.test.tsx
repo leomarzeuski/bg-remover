@@ -21,4 +21,13 @@ describe('ImageDropzone', () => {
     expect(onImage).not.toHaveBeenCalled();
     expect(screen.getByText(/não suportado/i)).toBeInTheDocument();
   });
+
+  it('chama onImage quando um arquivo é solto na zona de drop', () => {
+    const onImage = vi.fn();
+    render(<ImageDropzone onImage={onImage} />);
+    const dropzone = screen.getByRole('button', { name: /enviar imagem/i });
+    const file = new File(['x'], 'logo.png', { type: 'image/png' });
+    fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
+    expect(onImage).toHaveBeenCalledWith(file);
+  });
 });

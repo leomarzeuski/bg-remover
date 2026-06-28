@@ -43,4 +43,20 @@ describe('removeBackground', () => {
     const file = new File(['x'], 'logo.png', { type: 'image/png' });
     await expect(removeBackground(file)).rejects.toThrow('boom');
   });
+
+  it('não chama onProgress quando total é zero (evita divisão por zero)', async () => {
+    const blob = new Blob(['cut'], { type: 'image/png' });
+    vi.mocked(imglyRemoveBackground).mockImplementation(
+      async (_img: unknown, config?: { progress?: (k: string, c: number, t: number) => void }) => {
+        config?.progress?.('fetch:model', 0, 0);
+        return blob;
+      },
+    );
+
+    const onProgress = vi.fn();
+    const file = new File(['x'], 'logo.png', { type: 'image/png' });
+    await removeBackground(file, onProgress);
+
+    expect(onProgress).not.toHaveBeenCalled();
+  });
 });

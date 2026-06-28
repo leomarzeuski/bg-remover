@@ -18,11 +18,19 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   async function handleImage(file: File) {
+    // Revoke previous object URLs before creating new ones to prevent leaks
+    setOriginalUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setCutoutUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     setStatus('processing');
     setProgress(0);
     setError(null);
     setBgColor(null);
-    setOriginalUrl(URL.createObjectURL(file));
     try {
       const blob = await removeBackground(file, setProgress);
       setCutoutBlob(blob);
@@ -35,11 +43,18 @@ export default function App() {
   }
 
   function reset() {
+    setOriginalUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setCutoutUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     setStatus('idle');
-    setOriginalUrl(null);
     setCutoutBlob(null);
-    setCutoutUrl(null);
     setError(null);
+    setBgColor(null);
   }
 
   return (

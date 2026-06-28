@@ -22,7 +22,9 @@ npm run build    # gera dist/ para deploy estático
 ```
 
 > Na primeira remoção, o modelo de IA (~40MB) é baixado e fica em cache do
-> navegador. As próximas execuções são rápidas.
+> navegador. As próximas execuções são rápidas. O modelo é obtido diretamente
+> da CDN do @imgly/background-removal; a imagem em si é processada localmente
+> e nunca sai do seu dispositivo.
 
 ## Deploy
 
