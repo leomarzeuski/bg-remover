@@ -49,10 +49,10 @@ export default function App() {
     setBgColor(null);
     setEditing(false);
     try {
-      const blob = await removeBackground(file, (p, stage) => {
+      const blob = await removeBackground(file, (p, phase) => {
         setProgress(p);
         setLoadingLabel(
-          stage && stage.startsWith('fetch')
+          phase === 'download'
             ? 'Baixando modelo de IA… (só na primeira vez)'
             : 'Removendo o fundo…',
         );
