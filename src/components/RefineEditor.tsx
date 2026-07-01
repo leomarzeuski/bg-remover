@@ -119,6 +119,11 @@ export function RefineEditor({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [canUndo, setCanUndo] = useState(false);
+  const [cursor, setCursor] = useState<{
+    x: number;
+    y: number;
+    size: number;
+  } | null>(null);
 
   const modeRef = useRef(mode);
   const brushRef = useRef(brushSize);
@@ -207,6 +212,18 @@ export function RefineEditor({
     };
   };
 
+  const updateCursor = (e: PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scale = rect.width / (dimsRef.current.w || 1);
+    setCursor({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      size: brushRef.current * scale,
+    });
+  };
+
   const paintAt = (
     from: { x: number; y: number },
     to: { x: number; y: number },
@@ -238,6 +255,7 @@ export function RefineEditor({
   };
 
   const handlePointerMove = (e: PointerEvent<HTMLCanvasElement>) => {
+    updateCursor(e);
     if (!drawingRef.current) return;
     const p = eventToCanvas(e);
     const last = lastRef.current ?? p;
@@ -250,13 +268,29 @@ export function RefineEditor({
     lastRef.current = null;
   };
 
-  const handleUndo = () => {
+  const handlePointerLeave = () => {
+    handlePointerUp();
+    setCursor(null);
+  };
+
+  const handleUndo = useCallback(() => {
     const prev = undoRef.current.pop();
     if (!prev) return;
     alphaRef.current = prev;
     setCanUndo(undoRef.current.length > 0);
     render();
-  };
+  }, [render]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleUndo]);
 
   const handleRevert = async () => {
     try {
@@ -356,7 +390,7 @@ export function RefineEditor({
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div
-        className={`overflow-hidden rounded-2xl border border-border ${
+        className={`relative overflow-hidden rounded-2xl border border-border ${
           bgColor === null ? 'checkerboard' : ''
         }`}
         style={bgColor ? { backgroundColor: bgColor } : undefined}
@@ -366,10 +400,22 @@ export function RefineEditor({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
           className="block w-full touch-none [image-rendering:pixelated]"
           style={{ cursor: 'crosshair' }}
         />
+        {cursor && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute rounded-full border-2 border-white mix-blend-difference"
+            style={{
+              left: cursor.x - cursor.size / 2,
+              top: cursor.y - cursor.size / 2,
+              width: cursor.size,
+              height: cursor.size,
+            }}
+          />
+        )}
       </div>
 
       <div className="flex gap-3">
