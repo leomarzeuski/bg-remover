@@ -1,3 +1,4 @@
+export type Locale = 'pt' | 'en';
 
 const pt = {
   appName: 'SemFundo',
