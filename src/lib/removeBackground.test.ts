@@ -35,7 +35,7 @@ describe('removeBackground', () => {
     const file = new File(['x'], 'logo.png', { type: 'image/png' });
     await removeBackground(file, onProgress);
 
-    expect(onProgress).toHaveBeenCalledWith(0.5);
+    expect(onProgress).toHaveBeenCalledWith(0.5, 'fetch:model');
   });
 
   it('propaga erros da lib', async () => {

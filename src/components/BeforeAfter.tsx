@@ -8,13 +8,17 @@ export function BeforeAfter({ originalUrl, cutoutUrl, bgColor }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <figure>
-        <figcaption className="mb-1 text-sm text-gray-600">Original</figcaption>
-        <img src={originalUrl} alt="Original" className="w-full rounded border" />
+        <figcaption className="mb-1 text-sm text-muted">Original</figcaption>
+        <img
+          src={originalUrl}
+          alt="Original"
+          className="w-full rounded-2xl border border-border"
+        />
       </figure>
       <figure>
-        <figcaption className="mb-1 text-sm text-gray-600">Sem fundo</figcaption>
+        <figcaption className="mb-1 text-sm text-muted">Sem fundo</figcaption>
         <div
-          className={`overflow-hidden rounded border ${
+          className={`overflow-hidden rounded-2xl border border-border ${
             bgColor === null ? 'checkerboard' : ''
           }`}
           style={bgColor ? { backgroundColor: bgColor } : undefined}
