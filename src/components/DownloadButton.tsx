@@ -30,12 +30,12 @@ export function DownloadButton({ cutout, bgColor, fileName }: Props) {
     <div>
       <button
         onClick={handleDownload}
-        className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+        className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-opacity hover:opacity-90"
       >
         Baixar PNG
       </button>
       {downloadError && (
-        <p className="mt-1 text-sm text-red-600">{downloadError}</p>
+        <p className="mt-1 text-sm text-red-500">{downloadError}</p>
       )}
     </div>
   );

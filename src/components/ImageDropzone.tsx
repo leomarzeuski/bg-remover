@@ -44,14 +44,16 @@ export function ImageDropzone({ onImage }: Props) {
           setDragging(false);
           handleFile(e.dataTransfer.files[0]);
         }}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
-          dragging ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 text-center transition-colors ${
+          dragging
+            ? 'border-accent bg-accent/10'
+            : 'border-border hover:border-accent/60'
         }`}
       >
-        <p className="text-gray-600">
+        <p className="text-muted">
           Arraste uma imagem aqui ou clique para escolher
         </p>
-        <p className="mt-1 text-sm text-gray-400">PNG, JPG ou WebP</p>
+        <p className="mt-1 text-sm text-muted/70">PNG, JPG ou WebP</p>
         <input
           ref={inputRef}
           data-testid="file-input"
@@ -61,7 +63,7 @@ export function ImageDropzone({ onImage }: Props) {
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
       </div>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
   );
 }
