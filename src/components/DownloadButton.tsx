@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { composeBackground } from '../lib/composeBackground';
+import { track } from '../lib/track';
 import { useLocale } from '../i18n/locale';
 
 interface Props {
@@ -22,6 +23,7 @@ export function DownloadButton({ cutout, bgColor, fileName }: Props) {
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+      track('download');
     } catch (e) {
       console.error(e);
       setFailed(true);

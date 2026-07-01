@@ -9,8 +9,8 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { Logo } from './components/Logo';
 import { LangHint } from './components/LangHint';
 import { LandingContent } from './components/LandingContent';
-import { removeBackground } from './lib/removeBackground';
 import { validateImage } from './lib/validateImage';
+import { track } from './lib/track';
 import { useLocale } from './i18n/locale';
 import type { StringKey } from './i18n/strings';
 
@@ -54,6 +54,7 @@ export default function App() {
     setBgColor(null);
     setEditing(false);
     try {
+      const { removeBackground } = await import('./lib/removeBackground');
       const blob = await removeBackground(file, (p, phase) => {
         setProgress(p);
         setLoadingKey(phase === 'download' ? 'loadingDownloading' : 'loadingRemoving');
@@ -66,6 +67,7 @@ export default function App() {
       setAiBlob(blob);
       setAiUrl(URL.createObjectURL(blob));
       setStatus('done');
+      track('process_done');
     } catch (e) {
       console.error(e);
       setErrorKey('errorGeneric');
