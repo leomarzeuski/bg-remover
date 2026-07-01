@@ -51,7 +51,7 @@ export function ImageDropzone({ onImage }: Props) {
         }`}
       >
         <p className="text-muted">
-          Arraste uma imagem aqui ou clique para escolher
+          Arraste, cole (Ctrl/Cmd+V) ou clique para escolher
         </p>
         <p className="mt-1 text-sm text-muted/70">PNG, JPG ou WebP</p>
         <input

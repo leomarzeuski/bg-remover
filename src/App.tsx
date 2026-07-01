@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageDropzone } from './components/ImageDropzone';
 import { AiLoader } from './components/AiLoader';
 import { BeforeAfter } from './components/BeforeAfter';
@@ -7,6 +7,7 @@ import { DownloadButton } from './components/DownloadButton';
 import { RefineEditor } from './components/RefineEditor';
 import { ThemeToggle } from './components/ThemeToggle';
 import { removeBackground } from './lib/removeBackground';
+import { validateImage } from './lib/validateImage';
 
 type Status = 'idle' | 'processing' | 'done' | 'error';
 
@@ -101,6 +102,27 @@ export default function App() {
     });
     setRefinedBlob(null);
   }
+
+  useEffect(() => {
+    function onPaste(e: ClipboardEvent) {
+      if (status === 'processing') return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file && validateImage(file).ok) {
+            e.preventDefault();
+            void handleImage(file);
+            return;
+          }
+        }
+      }
+    }
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [status]);
 
   return (
     <div className="min-h-screen bg-surface text-foreground">
