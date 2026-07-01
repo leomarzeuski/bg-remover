@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { validateImage, type ValidationErrorCode } from '../lib/validateImage';
 import { useLocale } from '../i18n/locale';
 import type { StringKey } from '../i18n/strings';
+import { track } from '../lib/track';
 
 interface Props {
   onImage: (file: File) => void;
@@ -17,6 +18,7 @@ export function ImageDropzone({ onImage }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [errorKey, setErrorKey] = useState<StringKey | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [sampleLoading, setSampleLoading] = useState(false);
 
   function handleFile(file: File | undefined) {
     if (!file) return;
@@ -27,6 +29,24 @@ export function ImageDropzone({ onImage }: Props) {
     }
     setErrorKey(null);
     onImage(file);
+  }
+
+  async function handleSample() {
+    setSampleLoading(true);
+    setErrorKey(null);
+    try {
+      const res = await fetch('/exemplo.jpg');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const file = new File([blob], 'exemplo.jpg', { type: 'image/jpeg' });
+      track('sample_used');
+      onImage(file);
+    } catch (e) {
+      console.error(e);
+      setErrorKey('sampleError');
+    } finally {
+      setSampleLoading(false);
+    }
   }
 
   return (
@@ -70,6 +90,16 @@ export function ImageDropzone({ onImage }: Props) {
           className="hidden"
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
+      </div>
+      <div className="mt-3 text-center">
+        <button
+          type="button"
+          onClick={handleSample}
+          disabled={sampleLoading}
+          className="text-sm text-muted underline hover:text-foreground disabled:opacity-50"
+        >
+          {sampleLoading ? t('sampleLoading') : t('sampleButton')}
+        </button>
       </div>
       {errorKey && <p className="mt-2 text-sm text-red-500">{t(errorKey)}</p>}
     </div>
