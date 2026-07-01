@@ -1,32 +1,48 @@
-# bg-remover
+# SemFundo
 
-App web para remover o fundo de imagens (ex.: logos) direto no navegador.
-Todo o processamento roda localmente com `@imgly/background-removal` — nenhuma
-imagem é enviada para servidor.
+**[semfundo.app](https://semfundo.app)** — remova o fundo de imagens grátis,
+direto no navegador. Nada é enviado para servidor: a IA roda 100% no seu
+dispositivo. Sem cadastro, sem marca d'água, sem limite de resolução.
+
+![Demo](docs/launch/demo.gif)
+
+*Read this in English: the app itself is bilingual — [semfundo.app/en/](https://semfundo.app/en/).*
+
+## Por que outro removedor de fundo?
+
+Porque os grandes enviam sua foto para um servidor. O SemFundo processa tudo
+localmente (via [`@imgly/background-removal`](https://github.com/imgly/background-removal-js)
++ ONNX Runtime Web): privacidade verificável — este repositório é o código que
+roda no site.
 
 ## Recursos
 
-- Upload por arrastar-e-soltar ou seletor de arquivo (PNG, JPG, WebP)
-- Remoção de fundo com IA no navegador
-- Comparação antes/depois com fundo quadriculado
-- Trocar o fundo por uma cor sólida (ou manter transparente)
-- Baixar o resultado como PNG
+- Arrastar-e-soltar, colar (Ctrl/Cmd+V) ou escolher arquivo (PNG, JPG, WebP)
+- Remoção de fundo com IA no navegador, com progresso real
+- Pincel de refino (restaurar/apagar) com desfazer/refazer
+- Fundo transparente ou cor sólida; download em PNG na resolução original
+- Tema claro/escuro, PT-BR e inglês (`/en/`)
 
 ## Desenvolvimento
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm test         # roda os testes
-npm run build    # gera dist/ para deploy estático
+npm run dev      # http://localhost:5173 (EN em /en/index.html)
+npm test         # vitest
+npm run build    # gera dist/ estático (páginas / e /en/)
 ```
 
-> Na primeira remoção, o modelo de IA (~40MB) é baixado e fica em cache do
-> navegador. As próximas execuções são rápidas. O modelo é obtido diretamente
-> da CDN do @imgly/background-removal; a imagem em si é processada localmente
-> e nunca sai do seu dispositivo.
+> Na primeira remoção, o modelo de IA (~40 MB) é baixado da CDN da imgly e
+> fica em cache do navegador. A imagem processada nunca sai do dispositivo.
 
-## Deploy
+## Stack
 
-É um site estático. Após `npm run build`, faça deploy da pasta `dist/` em
-Vercel, Netlify ou GitHub Pages.
+Vite 7 · React 19 · TypeScript · Tailwind 4 · Vitest · Vercel (estático)
+
+## Licença
+
+[AGPL-3.0](./LICENSE). Usa `@imgly/background-removal` (AGPL-3.0) — por isso
+este repositório é público e o app linka o código no rodapé. As imagens que
+você processa são suas; a licença cobre só o código.
+
+Imagem de exemplo: [picsum.photos](https://picsum.photos) (fotos do Unsplash).
