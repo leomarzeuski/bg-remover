@@ -8,6 +8,7 @@ import { RefineEditor } from './components/RefineEditor';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Logo } from './components/Logo';
 import { LangHint } from './components/LangHint';
+import { LandingContent } from './components/LandingContent';
 import { removeBackground } from './lib/removeBackground';
 import { validateImage } from './lib/validateImage';
 import { useLocale } from './i18n/locale';
@@ -234,10 +235,24 @@ export default function App() {
             )}
           </div>
         )}
+
+        <LandingContent />
       </main>
 
-      <footer className="mx-auto max-w-4xl p-6 text-center text-xs text-muted">
-        {t('footerTagline')}
+      <footer className="mx-auto max-w-4xl space-y-1 p-6 text-center text-xs text-muted">
+        <p>{t('footerTagline')}</p>
+        <p>
+          <a
+            href="https://github.com/leomarzeuski/bg-remover"
+            className="underline hover:text-foreground"
+          >
+            {t('footerOpenSource')}
+          </a>
+          {' · AGPL-3.0 · '}
+          {t('footerAnalytics')}
+          {' · '}
+          {t('madeBy')}
+        </p>
       </footer>
     </div>
   );
