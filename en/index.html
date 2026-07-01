@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remove Image Background Free & Private | SemFundo</title>
+    <meta name="description" content="Remove the background from any image in seconds — free, no signup, no watermark. The AI runs 100% in your browser, so your photos never leave your device." />
+    <link rel="canonical" href="https://semfundo.app/en/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://semfundo.app/" />
+    <link rel="alternate" hreflang="en" href="https://semfundo.app/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://semfundo.app/en/" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SemFundo" />
+    <meta property="og:url" content="https://semfundo.app/en/" />
+    <meta property="og:title" content="SemFundo — Remove image backgrounds free, right in your browser" />
+    <meta property="og:description" content="Free, private, no signup: the AI runs 100% in your browser. Nothing is uploaded." />
+    <meta property="og:image" content="https://semfundo.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SemFundo — Remove image backgrounds free, right in your browser" />
+    <meta name="twitter:description" content="Free, private, no signup: the AI runs 100% in your browser." />
+    <meta name="twitter:image" content="https://semfundo.app/og.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "SemFundo",
+      "url": "https://semfundo.app/en/",
+      "description": "Free, private background remover: the AI runs 100% in your browser.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any (web browser)",
+      "inLanguage": "en",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Is SemFundo really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. No signup, no watermark, no resolution limits. The project is open source and costs almost nothing to run — that's how it stays free." } },
+        { "@type": "Question", "name": "Are my images uploaded to a server?", "acceptedAnswer": { "@type": "Answer", "text": "No. The AI runs inside your browser, on your device. Your image never leaves your computer or phone — and you can verify that in the open source code." } },
+        { "@type": "Question", "name": "Why is the first removal slower?", "acceptedAnswer": { "@type": "Answer", "text": "On first use, your browser downloads the AI model (~40 MB) and caches it. After that, processing starts right away." } },
+        { "@type": "Question", "name": "Which formats are supported?", "acceptedAnswer": { "@type": "Answer", "text": "PNG, JPG and WebP. The result downloads as a PNG with a transparent background — or any solid color you pick." } },
+        { "@type": "Question", "name": "Does it work on mobile?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. You can upload photos from your gallery, refine the cutout with your finger and download the result." } },
+        { "@type": "Question", "name": "Can I use the result commercially?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, the generated image is yours. (The app code is licensed under AGPL-3.0, which does not affect your images.)" } }
+      ]
+    }
+    </script>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var dark =
+            t === 'dark' ||
+            ((!t || t === 'system') &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
