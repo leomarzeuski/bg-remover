@@ -7,6 +7,7 @@ import { DownloadButton } from './components/DownloadButton';
 import { RefineEditor } from './components/RefineEditor';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Logo } from './components/Logo';
+import { LangHint } from './components/LangHint';
 import { removeBackground } from './lib/removeBackground';
 import { validateImage } from './lib/validateImage';
 import { useLocale } from './i18n/locale';
@@ -162,6 +163,7 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-4xl p-6">
+        <LangHint />
         <h1 className="mb-1 text-xl font-semibold">{t('h1')}</h1>
         <p className="mb-6 text-sm text-muted">{t('intro')}</p>
 
