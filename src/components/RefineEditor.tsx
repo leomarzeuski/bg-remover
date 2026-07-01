@@ -109,6 +109,7 @@ export function RefineEditor({
   const originalRef = useRef<ImageData | null>(null);
   const dimsRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
   const undoRef = useRef<Uint8ClampedArray[]>([]);
+  const redoRef = useRef<Uint8ClampedArray[]>([]);
   const drawingRef = useRef(false);
   const lastRef = useRef<{ x: number; y: number } | null>(null);
   const dirtyRef = useRef(false);
@@ -119,6 +120,7 @@ export function RefineEditor({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
   const [cursor, setCursor] = useState<{
     x: number;
     y: number;
@@ -212,15 +214,16 @@ export function RefineEditor({
     };
   };
 
+  // The brush size is expressed in on-screen (display) pixels, so it feels the
+  // same regardless of the image resolution.
   const updateCursor = (e: PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const scale = rect.width / (dimsRef.current.w || 1);
     setCursor({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-      size: brushRef.current * scale,
+      size: brushRef.current,
     });
   };
 
@@ -229,10 +232,14 @@ export function RefineEditor({
     to: { x: number; y: number },
   ) => {
     const alpha = alphaRef.current;
-    if (!alpha) return;
+    const canvas = canvasRef.current;
+    if (!alpha || !canvas) return;
     const { w, h } = dimsRef.current;
+    // Convert the display-pixel brush size to working-resolution pixels.
+    const scale = w / (canvas.getBoundingClientRect().width || 1);
+    const radius = (brushRef.current / 2) * scale;
     const value = modeRef.current === 'restore' ? 255 : 0;
-    paintStroke(alpha, w, h, from.x, from.y, to.x, to.y, brushRef.current / 2, value);
+    paintStroke(alpha, w, h, from.x, from.y, to.x, to.y, radius, value);
     scheduleRender();
   };
 
@@ -241,6 +248,8 @@ export function RefineEditor({
     if (!alpha) return;
     undoRef.current.push(new Uint8ClampedArray(alpha));
     if (undoRef.current.length > UNDO_LIMIT) undoRef.current.shift();
+    redoRef.current = [];
+    setCanRedo(false);
     setCanUndo(true);
   };
 
@@ -275,9 +284,21 @@ export function RefineEditor({
 
   const handleUndo = useCallback(() => {
     const prev = undoRef.current.pop();
-    if (!prev) return;
+    if (!prev || !alphaRef.current) return;
+    redoRef.current.push(new Uint8ClampedArray(alphaRef.current));
     alphaRef.current = prev;
     setCanUndo(undoRef.current.length > 0);
+    setCanRedo(true);
+    render();
+  }, [render]);
+
+  const handleRedo = useCallback(() => {
+    const next = redoRef.current.pop();
+    if (!next || !alphaRef.current) return;
+    undoRef.current.push(new Uint8ClampedArray(alphaRef.current));
+    alphaRef.current = next;
+    setCanRedo(redoRef.current.length > 0);
+    setCanUndo(true);
     render();
   }, [render]);
 
@@ -285,12 +306,13 @@ export function RefineEditor({
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        handleUndo();
+        if (e.shiftKey) handleRedo();
+        else handleUndo();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [handleUndo]);
+  }, [handleUndo, handleRedo]);
 
   const handleRevert = async () => {
     try {
@@ -300,7 +322,9 @@ export function RefineEditor({
       cutoutBitmap.close();
       alphaRef.current = extractAlpha(cutoutData.data);
       undoRef.current = [];
+      redoRef.current = [];
       setCanUndo(false);
+      setCanRedo(false);
       render();
     } catch {
       setError('Falha ao reverter para o recorte da IA.');
@@ -373,6 +397,14 @@ export function RefineEditor({
           className="rounded-lg border border-border px-3 py-1 text-sm disabled:opacity-40"
         >
           Desfazer
+        </button>
+        <button
+          type="button"
+          onClick={handleRedo}
+          disabled={!canRedo}
+          className="rounded-lg border border-border px-3 py-1 text-sm disabled:opacity-40"
+        >
+          Refazer
         </button>
         <button
           type="button"
