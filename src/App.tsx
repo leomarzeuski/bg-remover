@@ -57,6 +57,11 @@ export default function App() {
             : 'Removendo o fundo…',
         );
       });
+      // O último evento do imgly (100%) seria agrupado com a troca de tela e
+      // não chegaria a pintar — força o 100% e deixa aparecer antes de trocar.
+      setProgress(1);
+      setLoadingLabel('Pronto!');
+      await new Promise((resolve) => setTimeout(resolve, 600));
       setAiBlob(blob);
       setAiUrl(URL.createObjectURL(blob));
       setStatus('done');
