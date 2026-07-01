@@ -6,6 +6,8 @@ import {
   type PointerEvent,
 } from 'react';
 import { composite, extractAlpha, paintStroke } from '../lib/refine';
+import { useLocale } from '../i18n/locale';
+import type { StringKey } from '../i18n/strings';
 
 interface Props {
   originalUrl: string;
@@ -104,6 +106,7 @@ export function RefineEditor({
   onApply,
   onCancel,
 }: Props) {
+  const { t } = useLocale();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const alphaRef = useRef<Uint8ClampedArray | null>(null);
   const originalRef = useRef<ImageData | null>(null);
@@ -118,7 +121,7 @@ export function RefineEditor({
   const [mode, setMode] = useState<Mode>('restore');
   const [brushSize, setBrushSize] = useState(28);
   const [ready, setReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<StringKey | null>(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [cursor, setCursor] = useState<{
@@ -173,9 +176,8 @@ export function RefineEditor({
         render();
       } catch (e) {
         if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : 'Falha ao preparar o editor.',
-          );
+          console.error(e);
+          setErrorKey('refinePrepareError');
         }
       }
     })();
@@ -327,14 +329,14 @@ export function RefineEditor({
       setCanRedo(false);
       render();
     } catch {
-      setError('Falha ao reverter para o recorte da IA.');
+      setErrorKey('refineRevertError');
     }
   };
 
   const handleApply = async () => {
     const alpha = alphaRef.current;
     if (!alpha) return;
-    setError(null);
+    setErrorKey(null);
     try {
       const blob = await exportMasked(
         originalUrl,
@@ -344,9 +346,8 @@ export function RefineEditor({
       );
       onApply(blob);
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : 'Erro ao gerar o PNG. Tente novamente.',
-      );
+      console.error(e);
+      setErrorKey('refineExportError');
     }
   };
 
@@ -364,7 +365,7 @@ export function RefineEditor({
                 : 'text-foreground'
             }`}
           >
-            Restaurar
+            {t('refineRestore')}
           </button>
           <button
             type="button"
@@ -376,18 +377,18 @@ export function RefineEditor({
                 : 'text-foreground'
             }`}
           >
-            Apagar
+            {t('refineErase')}
           </button>
         </div>
         <label className="flex items-center gap-2 text-sm text-muted">
-          Pincel
+          {t('refineBrush')}
           <input
             type="range"
             min={4}
             max={80}
             value={brushSize}
             onChange={(e) => setBrushSize(Number(e.target.value))}
-            aria-label="Tamanho do pincel"
+            aria-label={t('refineBrushAria')}
           />
         </label>
         <button
@@ -396,7 +397,7 @@ export function RefineEditor({
           disabled={!canUndo}
           className="rounded-lg border border-border px-3 py-1 text-sm disabled:opacity-40"
         >
-          Desfazer
+          {t('refineUndo')}
         </button>
         <button
           type="button"
@@ -404,22 +405,22 @@ export function RefineEditor({
           disabled={!canRedo}
           className="rounded-lg border border-border px-3 py-1 text-sm disabled:opacity-40"
         >
-          Refazer
+          {t('refineRedo')}
         </button>
         <button
           type="button"
           onClick={handleRevert}
           className="rounded-lg border border-border px-3 py-1 text-sm"
         >
-          Reverter para IA
+          {t('revertToAi')}
         </button>
       </div>
 
       <p className="text-xs text-muted">
-        Pinte sobre a imagem para restaurar ou apagar partes do recorte.
+        {t('refineHint')}
       </p>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {errorKey && <p className="text-sm text-red-500">{t(errorKey)}</p>}
 
       <div
         className={`relative overflow-hidden rounded-2xl border border-border ${
@@ -456,14 +457,14 @@ export function RefineEditor({
           onClick={handleApply}
           className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground"
         >
-          Aplicar
+          {t('refineApply')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border border-border px-4 py-2"
         >
-          Cancelar
+          {t('refineCancel')}
         </button>
       </div>
     </div>

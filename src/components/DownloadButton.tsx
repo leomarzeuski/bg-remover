@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { composeBackground } from '../lib/composeBackground';
+import { useLocale } from '../i18n/locale';
 
 interface Props {
   cutout: Blob;
@@ -8,10 +9,11 @@ interface Props {
 }
 
 export function DownloadButton({ cutout, bgColor, fileName }: Props) {
-  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const { t } = useLocale();
+  const [failed, setFailed] = useState(false);
 
   async function handleDownload() {
-    setDownloadError(null);
+    setFailed(false);
     try {
       const blob = await composeBackground(cutout, bgColor);
       const url = URL.createObjectURL(blob);
@@ -22,7 +24,7 @@ export function DownloadButton({ cutout, bgColor, fileName }: Props) {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      setDownloadError('Erro ao gerar o arquivo para download. Tente novamente.');
+      setFailed(true);
     }
   }
 
@@ -32,10 +34,10 @@ export function DownloadButton({ cutout, bgColor, fileName }: Props) {
         onClick={handleDownload}
         className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground transition-opacity hover:opacity-90"
       >
-        Baixar PNG
+        {t('downloadPng')}
       </button>
-      {downloadError && (
-        <p className="mt-1 text-sm text-red-500">{downloadError}</p>
+      {failed && (
+        <p className="mt-1 text-sm text-red-500">{t('downloadError')}</p>
       )}
     </div>
   );

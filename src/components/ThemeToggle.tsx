@@ -1,17 +1,20 @@
 import { useTheme, type Theme } from '../hooks/useTheme';
+import { useLocale } from '../i18n/locale';
+import type { StringKey } from '../i18n/strings';
 
-const OPTIONS: { value: Theme; label: string; icon: string }[] = [
-  { value: 'light', label: 'Tema claro', icon: '☀️' },
-  { value: 'dark', label: 'Tema escuro', icon: '🌙' },
-  { value: 'system', label: 'Tema do sistema', icon: '🖥️' },
+const OPTIONS: { value: Theme; key: StringKey; icon: string }[] = [
+  { value: 'light', key: 'themeLight', icon: '☀️' },
+  { value: 'dark', key: 'themeDark', icon: '🌙' },
+  { value: 'system', key: 'themeSystem', icon: '🖥️' },
 ];
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useLocale();
   return (
     <div
       role="group"
-      aria-label="Tema"
+      aria-label={t('themeGroup')}
       className="inline-flex items-center gap-0.5 rounded-lg border border-border p-0.5"
     >
       {OPTIONS.map((opt) => (
@@ -19,7 +22,7 @@ export function ThemeToggle() {
           key={opt.value}
           type="button"
           onClick={() => setTheme(opt.value)}
-          aria-label={opt.label}
+          aria-label={t(opt.key)}
           aria-pressed={theme === opt.value}
           className={`rounded-md px-2 py-1 text-sm transition-colors ${
             theme === opt.value
