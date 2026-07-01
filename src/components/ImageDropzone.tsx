@@ -38,7 +38,10 @@ export function ImageDropzone({ onImage }: Props) {
       const res = await fetch('/exemplo.jpg');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
-      const file = new File([blob], 'exemplo.jpg', { type: 'image/jpeg' });
+      if (!blob.type.startsWith('image/')) {
+        throw new Error(`unexpected content-type: ${blob.type}`);
+      }
+      const file = new File([blob], 'exemplo.jpg', { type: blob.type });
       track('sample_used');
       onImage(file);
     } catch (e) {

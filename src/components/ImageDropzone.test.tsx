@@ -38,7 +38,15 @@ describe('ImageDropzone', () => {
     const blob = new Blob(['fake-jpg'], { type: 'image/jpeg' });
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => new Response(blob, { status: 200 })),
+      vi.fn(
+        async () =>
+          // Header explícito: no ambiente jsdom o undici não propaga o type
+          // do Blob para a Response (um servidor real envia Content-Type).
+          new Response(blob, {
+            status: 200,
+            headers: { 'Content-Type': 'image/jpeg' },
+          }),
+      ),
     );
     render(<ImageDropzone onImage={onImage} />);
     fireEvent.click(screen.getByRole('button', { name: /imagem de exemplo/i }));
@@ -46,6 +54,30 @@ describe('ImageDropzone', () => {
     const file = onImage.mock.calls[0][0] as File;
     expect(file.name).toBe('exemplo.jpg');
     expect(file.type).toBe('image/jpeg');
+    vi.unstubAllGlobals();
+  });
+
+  it('mostra sampleError quando o fetch retorna conteúdo que não é imagem', async () => {
+    const onImage = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(new Blob(['<html>'], { type: 'text/html' }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<ImageDropzone onImage={onImage} />);
+    fireEvent.click(screen.getByRole('button', { name: /imagem de exemplo/i }));
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'Não foi possível carregar o exemplo. Tente enviar uma imagem.',
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(onImage).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 });
