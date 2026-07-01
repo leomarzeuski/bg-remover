@@ -6,6 +6,7 @@ import { BackgroundPicker } from './components/BackgroundPicker';
 import { DownloadButton } from './components/DownloadButton';
 import { RefineEditor } from './components/RefineEditor';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Logo } from './components/Logo';
 import { removeBackground } from './lib/removeBackground';
 import { validateImage } from './lib/validateImage';
 
@@ -129,10 +130,7 @@ export default function App() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-4xl items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <span
-              className="h-6 w-6 rounded-md bg-linear-to-br from-accent-2 to-accent"
-              aria-hidden
-            />
+            <Logo className="h-7 w-7" />
             <span className="font-semibold">bg-remover</span>
           </div>
           <ThemeToggle />
