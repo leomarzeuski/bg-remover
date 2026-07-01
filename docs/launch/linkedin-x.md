@@ -17,7 +17,7 @@ Fiz um removedor de fundo de imagens que roda 100% no seu navegador — nenhuma 
 [anexar docs/launch/demo.gif]
 
 **2/3**
-Como funciona: a IA (`@imgly/background-removal` + ONNX Runtime Web) processa tudo localmente. O modelo (~40MB) baixa uma vez e fica em cache do navegador; depois disso, cada imagem sai em ~1-2s, sem round-trip pra internet.
+Como funciona: a IA (@imgly/background-removal + ONNX Runtime Web) processa tudo localmente. O modelo (~40MB) baixa uma vez e fica em cache do navegador; depois disso, cada imagem sai em segundos, sem round-trip pra internet.
 
 **3/3**
 É grátis, sem cadastro, e o código é aberto (AGPL) — dá pra auditar em vez de confiar só na minha palavra.
@@ -31,9 +31,9 @@ I built a background remover that runs 100% in your browser — no photo ever to
 [attach docs/launch/demo.gif]
 
 **2/3**
-How it works: the AI (`@imgly/background-removal` + ONNX Runtime Web) runs entirely client-side. A ~40MB model downloads once and caches locally; after that, each image processes in ~1-2s with no network round-trip.
+How it works: the AI (@imgly/background-removal + ONNX Runtime Web) runs entirely client-side. A ~40MB model downloads once and caches locally; after that, each image processes in seconds with no network round-trip.
 
 **3/3**
 Free, no signup, and open source (AGPL) so you can verify the privacy claim yourself instead of trusting me.
-App: https://semfundo.app
+App: https://semfundo.app/en/
 Code: https://github.com/leomarzeuski/bg-remover
