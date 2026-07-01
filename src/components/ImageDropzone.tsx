@@ -1,23 +1,31 @@
 import { useRef, useState } from 'react';
-import { validateImage } from '../lib/validateImage';
+import { validateImage, type ValidationErrorCode } from '../lib/validateImage';
+import { useLocale } from '../i18n/locale';
+import type { StringKey } from '../i18n/strings';
 
 interface Props {
   onImage: (file: File) => void;
 }
 
+const ERROR_KEY: Record<ValidationErrorCode, StringKey> = {
+  'unsupported-type': 'errorUnsupportedType',
+  'empty-file': 'errorEmptyFile',
+};
+
 export function ImageDropzone({ onImage }: Props) {
+  const { t } = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<StringKey | null>(null);
   const [dragging, setDragging] = useState(false);
 
   function handleFile(file: File | undefined) {
     if (!file) return;
     const result = validateImage(file);
     if (!result.ok) {
-      setError(result.message);
+      setErrorKey(ERROR_KEY[result.code]);
       return;
     }
-    setError(null);
+    setErrorKey(null);
     onImage(file);
   }
 
@@ -26,7 +34,7 @@ export function ImageDropzone({ onImage }: Props) {
       <div
         role="button"
         tabIndex={0}
-        aria-label="Enviar imagem"
+        aria-label={t('dropzoneAria')}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -51,9 +59,9 @@ export function ImageDropzone({ onImage }: Props) {
         }`}
       >
         <p className="text-muted">
-          Arraste, cole (Ctrl/Cmd+V) ou clique para escolher
+          {t('dropzonePrompt')}
         </p>
-        <p className="mt-1 text-sm text-muted/70">PNG, JPG ou WebP</p>
+        <p className="mt-1 text-sm text-muted/70">{t('dropzoneFormats')}</p>
         <input
           ref={inputRef}
           data-testid="file-input"
@@ -63,7 +71,7 @@ export function ImageDropzone({ onImage }: Props) {
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
       </div>
-      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+      {errorKey && <p className="mt-2 text-sm text-red-500">{t(errorKey)}</p>}
     </div>
   );
 }
