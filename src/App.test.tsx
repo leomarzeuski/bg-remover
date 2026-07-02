@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
 import { removeBackground } from './lib/removeBackground';
+import { LocaleProvider } from './i18n/locale';
 
 vi.mock('./lib/removeBackground', () => ({
   removeBackground: vi.fn(async () => new Blob(['cut'], { type: 'image/png' })),
@@ -38,5 +39,17 @@ describe('App', () => {
         screen.getByRole('button', { name: /tentar de novo/i }),
       ).toBeInTheDocument();
     });
+  });
+
+  it('renderiza em inglês dentro de LocaleProvider en', () => {
+    render(
+      <LocaleProvider locale="en">
+        <App />
+      </LocaleProvider>,
+    );
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      /remove image backgrounds/i,
+    );
+    expect(screen.getByRole('link', { name: 'PT' })).toHaveAttribute('href', '/');
   });
 });

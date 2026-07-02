@@ -7,15 +7,20 @@ import { DownloadButton } from './components/DownloadButton';
 import { RefineEditor } from './components/RefineEditor';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Logo } from './components/Logo';
-import { removeBackground } from './lib/removeBackground';
+import { LangHint } from './components/LangHint';
+import { LandingContent } from './components/LandingContent';
 import { validateImage } from './lib/validateImage';
+import { track } from './lib/track';
+import { useLocale } from './i18n/locale';
+import type { StringKey } from './i18n/strings';
 
 type Status = 'idle' | 'processing' | 'done' | 'error';
 
 export default function App() {
+  const { locale, t } = useLocale();
   const [status, setStatus] = useState<Status>('idle');
   const [progress, setProgress] = useState(0);
-  const [loadingLabel, setLoadingLabel] = useState('Preparando…');
+  const [loadingKey, setLoadingKey] = useState<StringKey>('loadingPreparing');
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [aiBlob, setAiBlob] = useState<Blob | null>(null);
   const [aiUrl, setAiUrl] = useState<string | null>(null);
@@ -23,7 +28,7 @@ export default function App() {
   const [refinedUrl, setRefinedUrl] = useState<string | null>(null);
   const [bgColor, setBgColor] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<StringKey | null>(null);
 
   const activeBlob = refinedBlob ?? aiBlob;
   const activeUrl = refinedUrl ?? aiUrl;
@@ -44,29 +49,28 @@ export default function App() {
     setRefinedBlob(null);
     setStatus('processing');
     setProgress(0);
-    setLoadingLabel('Preparando…');
-    setError(null);
+    setLoadingKey('loadingPreparing');
+    setErrorKey(null);
     setBgColor(null);
     setEditing(false);
     try {
+      const { removeBackground } = await import('./lib/removeBackground');
       const blob = await removeBackground(file, (p, phase) => {
         setProgress(p);
-        setLoadingLabel(
-          phase === 'download'
-            ? 'Baixando modelo de IA… (só na primeira vez)'
-            : 'Removendo o fundo…',
-        );
+        setLoadingKey(phase === 'download' ? 'loadingDownloading' : 'loadingRemoving');
       });
       // O último evento do imgly (100%) seria agrupado com a troca de tela e
       // não chegaria a pintar — força o 100% e deixa aparecer antes de trocar.
       setProgress(1);
-      setLoadingLabel('Pronto!');
+      setLoadingKey('loadingDone');
       await new Promise((resolve) => setTimeout(resolve, 600));
       setAiBlob(blob);
       setAiUrl(URL.createObjectURL(blob));
       setStatus('done');
+      track('process_done');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao remover o fundo.');
+      console.error(e);
+      setErrorKey('errorGeneric');
       setStatus('error');
     }
   }
@@ -87,7 +91,7 @@ export default function App() {
     setStatus('idle');
     setAiBlob(null);
     setRefinedBlob(null);
-    setError(null);
+    setErrorKey(null);
     setBgColor(null);
     setEditing(false);
   }
@@ -136,32 +140,50 @@ export default function App() {
         <div className="mx-auto flex max-w-4xl items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <Logo className="h-7 w-7" />
-            <span className="font-semibold">bg-remover</span>
+            <span className="font-semibold">{t('appName')}</span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            {locale === 'pt' ? (
+              <a
+                href="/en/"
+                title="Read this page in English"
+                className="text-sm text-muted hover:text-foreground"
+              >
+                EN
+              </a>
+            ) : (
+              <a
+                href="/"
+                title="Ler esta página em português"
+                className="text-sm text-muted hover:text-foreground"
+              >
+                PT
+              </a>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl p-6">
-        <p className="mb-6 text-sm text-muted">
-          Remova o fundo das suas imagens direto no navegador. Nada é enviado
-          para servidor.
-        </p>
+        <LangHint />
+        <h1 className="mb-1 text-xl font-semibold">{t('h1')}</h1>
+        <p className="mb-6 text-sm text-muted">{t('intro')}</p>
 
         {status === 'idle' && <ImageDropzone onImage={handleImage} />}
 
         {status === 'processing' && (
-          <AiLoader progress={progress} label={loadingLabel} />
+          <AiLoader progress={progress} label={t(loadingKey)} />
         )}
 
         {status === 'error' && (
           <div className="rounded-2xl border border-red-400/40 bg-red-500/10 p-4">
-            <p className="mb-3 text-red-500">{error}</p>
+            <p className="mb-3 text-red-500">{errorKey && t(errorKey)}</p>
             <button
               className="rounded-lg bg-accent px-4 py-2 text-accent-foreground"
               onClick={reset}
             >
-              Tentar de novo
+              {t('tryAgain')}
             </button>
           </div>
         )}
@@ -188,37 +210,51 @@ export default function App() {
                   <DownloadButton
                     cutout={activeBlob}
                     bgColor={bgColor}
-                    fileName="sem-fundo.png"
+                    fileName={t('downloadFileName')}
                   />
                   <button
                     className="rounded-lg border border-border px-4 py-2"
                     onClick={() => setEditing(true)}
                   >
-                    Refinar recorte
+                    {t('refineCutout')}
                   </button>
                   {refinedBlob && (
                     <button
                       className="rounded-lg border border-border px-4 py-2"
                       onClick={revertRefine}
                     >
-                      Reverter para IA
+                      {t('revertToAi')}
                     </button>
                   )}
                   <button
                     className="rounded-lg border border-border px-4 py-2"
                     onClick={reset}
                   >
-                    Nova imagem
+                    {t('newImage')}
                   </button>
                 </div>
               </>
             )}
           </div>
         )}
+
+        <LandingContent />
       </main>
 
-      <footer className="mx-auto max-w-4xl p-6 text-center text-xs text-muted">
-        100% no navegador · nada é enviado para servidor
+      <footer className="mx-auto max-w-4xl space-y-1 p-6 text-center text-xs text-muted">
+        <p>{t('footerTagline')}</p>
+        <p>
+          <a
+            href="https://github.com/leomarzeuski/bg-remover"
+            className="underline hover:text-foreground"
+          >
+            {t('footerOpenSource')}
+          </a>
+          {' · AGPL-3.0 · '}
+          {t('footerAnalytics')}
+          {' · '}
+          {t('madeBy')}
+        </p>
       </footer>
     </div>
   );

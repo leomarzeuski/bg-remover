@@ -9,21 +9,13 @@ describe('validateImage', () => {
     }
   });
 
-  it('rejeita tipos não suportados com mensagem', () => {
+  it('rejeita tipos não suportados com código', () => {
     const file = new File(['x'], 'doc.pdf', { type: 'application/pdf' });
-    const result = validateImage(file);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.message).toMatch(/não suportado/i);
-    }
+    expect(validateImage(file)).toEqual({ ok: false, code: 'unsupported-type' });
   });
 
-  it('rejeita arquivo vazio', () => {
+  it('rejeita arquivo vazio com código', () => {
     const file = new File([], 'vazio.png', { type: 'image/png' });
-    const result = validateImage(file);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.message).toMatch(/vazio/i);
-    }
+    expect(validateImage(file)).toEqual({ ok: false, code: 'empty-file' });
   });
 });

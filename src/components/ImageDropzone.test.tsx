@@ -1,8 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ImageDropzone } from './ImageDropzone';
 
+vi.mock('../lib/track', () => ({ track: vi.fn() }));
+
 describe('ImageDropzone', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it('chama onImage com um PNG válido', () => {
     const onImage = vi.fn();
     render(<ImageDropzone onImage={onImage} />);
@@ -29,5 +34,51 @@ describe('ImageDropzone', () => {
     const file = new File(['x'], 'logo.png', { type: 'image/png' });
     fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
     expect(onImage).toHaveBeenCalledWith(file);
+  });
+
+  it('botão de exemplo busca /exemplo.jpg e chama onImage', async () => {
+    const onImage = vi.fn();
+    const blob = new Blob(['fake-jpg'], { type: 'image/jpeg' });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          // Header explícito: no ambiente jsdom o undici não propaga o type
+          // do Blob para a Response (um servidor real envia Content-Type).
+          new Response(blob, {
+            status: 200,
+            headers: { 'Content-Type': 'image/jpeg' },
+          }),
+      ),
+    );
+    render(<ImageDropzone onImage={onImage} />);
+    fireEvent.click(screen.getByRole('button', { name: /imagem de exemplo/i }));
+    await waitFor(() => expect(onImage).toHaveBeenCalled());
+    const file = onImage.mock.calls[0][0] as File;
+    expect(file.name).toBe('exemplo.jpg');
+    expect(file.type).toBe('image/jpeg');
+  });
+
+  it('mostra sampleError quando o fetch retorna conteúdo que não é imagem', async () => {
+    const onImage = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(new Blob(['<html>'], { type: 'text/html' }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<ImageDropzone onImage={onImage} />);
+    fireEvent.click(screen.getByRole('button', { name: /imagem de exemplo/i }));
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'Não foi possível carregar o exemplo. Tente enviar uma imagem.',
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(onImage).not.toHaveBeenCalled();
   });
 });
