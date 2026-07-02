@@ -328,7 +328,8 @@ export function RefineEditor({
       setCanUndo(false);
       setCanRedo(false);
       render();
-    } catch {
+    } catch (e) {
+      console.error(e);
       setErrorKey('refineRevertError');
     }
   };

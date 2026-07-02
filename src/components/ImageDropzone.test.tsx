@@ -1,10 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ImageDropzone } from './ImageDropzone';
 
 vi.mock('../lib/track', () => ({ track: vi.fn() }));
 
 describe('ImageDropzone', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it('chama onImage com um PNG válido', () => {
     const onImage = vi.fn();
     render(<ImageDropzone onImage={onImage} />);
@@ -54,7 +57,6 @@ describe('ImageDropzone', () => {
     const file = onImage.mock.calls[0][0] as File;
     expect(file.name).toBe('exemplo.jpg');
     expect(file.type).toBe('image/jpeg');
-    vi.unstubAllGlobals();
   });
 
   it('mostra sampleError quando o fetch retorna conteúdo que não é imagem', async () => {
@@ -78,6 +80,5 @@ describe('ImageDropzone', () => {
       ).toBeInTheDocument(),
     );
     expect(onImage).not.toHaveBeenCalled();
-    vi.unstubAllGlobals();
   });
 });
